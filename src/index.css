@@ -1,0 +1,27 @@
+@import "@fontsource/cormorant-garamond/500-italic.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+@import "tailwindcss";
+
+/* Cyber Angel palette & type (Figma: Chartes graphiques › 03 — Cyber Angel) */
+@theme {
+  --color-nuit: #0a0d1f;    /* Nuit noire — background */
+  --color-minuit: #131a3d;  /* Bleu minuit — surfaces */
+  --color-halo: #8f8cff;    /* Violet halo */
+  --color-glace: #a9c7ff;   /* Bleu glace — borders, secondary */
+  --color-cyan: #5cf2e4;    /* Cyan terminal — accent */
+  --color-argent: #b9c0d4;  /* Argent — muted text */
+  --color-ailes: #f2f6ff;   /* Blanc ailes — text */
+  --color-glitch: #ff3b5c;  /* Alerte glitch — danger */
+
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    @apply bg-nuit font-mono text-ailes antialiased;
+    color-scheme: dark;
+  }
+}
