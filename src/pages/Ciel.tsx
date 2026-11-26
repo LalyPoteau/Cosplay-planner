@@ -16,7 +16,7 @@ export default function Ciel() {
   const { state } = useStore()
   const [view, setView] = useState<View>('ciel')
   const [filter, setFilter] = useState<CosplayStatus | null>(null)
-  const [selectedId, setSelectedId] = useState<string | null>(state.currentCosplayId)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
 
   const visible = new Set(state.cosplays.filter((c) => !filter || c.status === filter).map((c) => c.id))
@@ -29,15 +29,14 @@ export default function Ciel() {
     <>
       <PageHeader code="CIEL DES PROJETS" title="Ciel des projets" subtitle="Chaque étoile est un costume. Chaque constellation, une série.">
         <div className="flex items-center gap-3">
-          <div role="tablist" aria-label="Affichage" className="flex h-8 border border-glace/35 bg-glace/6 p-[2px]">
+          <div role="group" aria-label="Affichage" className="flex h-8 border border-glace/35 bg-glace/6 p-[2px]">
             {(['ciel', 'galerie'] as const).map((v) => (
               <button
                 key={v}
-                role="tab"
                 type="button"
-                aria-selected={view === v}
+                aria-pressed={view === v}
                 onClick={() => setView(v)}
-                className="flex cursor-pointer items-center gap-[6px] px-3 text-[9px] tracking-[0.72px] text-argent uppercase transition aria-selected:border aria-selected:border-cyan/70 aria-selected:bg-linear-to-r aria-selected:from-halo/55 aria-selected:to-cyan/20 aria-selected:font-medium aria-selected:text-ailes"
+                className="flex cursor-pointer items-center gap-[6px] px-3 text-[9px] tracking-[0.72px] text-argent uppercase transition aria-pressed:border aria-pressed:border-cyan/70 aria-pressed:bg-linear-to-r aria-pressed:from-halo/55 aria-pressed:to-cyan/20 aria-pressed:font-medium aria-pressed:text-ailes"
               >
                 {v === 'ciel' ? <img src={eclat} alt="" className="size-4" /> : <span aria-hidden className="text-[13px] leading-none">▦</span>}
                 {v}
@@ -86,7 +85,7 @@ export default function Ciel() {
 }
 
 function Gallery({ visible }: { visible: Set<string> }) {
-  const { state, update, remove, set } = useStore()
+  const { state, update, remove } = useStore()
 
   return (
     <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -94,11 +93,10 @@ function Gallery({ visible }: { visible: Set<string> }) {
         .filter((c) => visible.has(c.id))
         .map((c) => {
           const progress = sel.cosplayProgress(state, c.id)
-          const manual = !sel.hasTasks(state, c.id) && c.status !== 'Terminé'
-          const isCurrent = c.id === state.currentCosplayId
+          const manual = !sel.hasParts(state, c.id) && c.status !== 'Fini'
           return (
             <li key={c.id}>
-              <Panel title={c.series.toUpperCase() || 'SANS SÉRIE'} tag={isCurrent ? '[EN COURS]' : undefined} className="h-full">
+              <Panel title={c.series.toUpperCase() || 'SANS SÉRIE'} className="h-full">
                 <div className="flex flex-1 flex-col gap-3 px-4 pt-3 pb-4">
                   <div className="flex items-start justify-between gap-2">
                     <CosplayIcon icon={c.icon} name={c.name} size={48} onChange={(icon) => update('cosplays', c.id, { icon })} />
@@ -133,18 +131,13 @@ function Gallery({ visible }: { visible: Set<string> }) {
                     <ProgressBar value={progress} label={`Avancement ${c.name}`} />
                   )}
                   <p className="text-[10px] text-ardoise">
-                    {sel.progressSource(sel.cosplayTaskStats(state, c.id), c.status === 'Terminé')} · {hours(sel.cosplayMinutes(state, c.id))} ·{' '}
+                    {sel.progressSource(sel.cosplayPartStats(state, c.id), c.status === 'Fini')} · {hours(sel.cosplayMinutes(state, c.id))} ·{' '}
                     {euros(sel.cosplaySpent(state, c.id))}
                   </p>
                   <div className="mt-auto flex gap-2">
                     <Button variant="primary" className="h-8" onClick={() => openCosplay(c.id)}>
                       OUVRIR LA FICHE
                     </Button>
-                    {!isCurrent && (
-                      <Button className="h-8" onClick={() => set({ currentCosplayId: c.id })}>
-                        METTRE EN COURS
-                      </Button>
-                    )}
                   </div>
                 </div>
               </Panel>

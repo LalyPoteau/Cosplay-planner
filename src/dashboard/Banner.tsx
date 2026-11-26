@@ -52,10 +52,11 @@ export default function Banner({ today }: { today: Date }) {
           <input
             ref={search}
             type="search"
+            aria-label="Rechercher un cosplay, une tâche"
             placeholder="Rechercher un cosplay, une tâche…"
             className="size-full bg-transparent pr-10 pl-[37px] text-[10.5px] text-ailes outline-none placeholder:text-argent focus-visible:rounded-full focus-visible:ring-1 focus-visible:ring-cyan/60"
           />
-          <kbd className="absolute right-[12px] text-[10px] text-ardoise">⌘K</kbd>
+          <kbd aria-hidden className="absolute right-[12px] text-[10px] text-ardoise">⌘K</kbd>
         </label>
         <button type="button" aria-label="Notifications (1 nouvelle)" className="relative ml-5 size-5 cursor-pointer">
           <img src={cloche} alt="" className="size-5" />

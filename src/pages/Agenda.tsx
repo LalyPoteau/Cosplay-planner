@@ -8,7 +8,7 @@ import { CosplaySelect } from './shared'
 
 export default function Agenda() {
   const { state, today, add, remove } = useStore()
-  const blank = { name: '', city: '', date: '', cosplayId: state.currentCosplayId }
+  const blank = { name: '', city: '', date: '', cosplayId: null as string | null }
   const [form, setForm] = useState(blank)
 
   const submit = (e: FormEvent) => {

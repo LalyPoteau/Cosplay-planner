@@ -97,7 +97,7 @@ export default function Sky({ visible, selectedId, onSelect, onOpen }: Props) {
           const segments = pts.slice(0, closed ? pts.length : -1).map((a, i) => [a, pts[(i + 1) % pts.length], stars[i], stars[(i + 1) % stars.length]] as const)
           return segments.map(([a, b, sa, sb], i) => {
             const dim = !visible.has(sa.cosplay.id) || !visible.has(sb.cosplay.id)
-            const idea = sa.cosplay.status === 'Idée' || sb.cosplay.status === 'Idée'
+            const idea = sa.cosplay.status === 'Prévu' || sb.cosplay.status === 'Prévu'
             return (
               <line
                 key={`${series}-${i}`}
@@ -206,7 +206,7 @@ export default function Sky({ visible, selectedId, onSelect, onOpen }: Props) {
       })()}
 
       <p className="pointer-events-none absolute bottom-5 left-6 text-[9px] tracking-[0.9px] whitespace-pre text-ardoise">
-        {'LIGNE = MÊME SÉRIE   ·   COULEUR = SÉRIE   ·   ANNEAU = PROGRESSION   ·   POINTILLÉ = IDÉE   ·   GLISSER = DÉPLACER   ·   DOUBLE-CLIC = OUVRIR'}
+        {'LIGNE = MÊME SÉRIE   ·   COULEUR = SÉRIE   ·   ANNEAU = PROGRESSION   ·   POINTILLÉ = PRÉVU   ·   GLISSER = DÉPLACER   ·   DOUBLE-CLIC = OUVRIR'}
       </p>
 
       {selected && <StarCard star={selected} onOpen={() => onOpen(selected.cosplay.id)} onClose={() => onSelect(null)} />}
@@ -216,15 +216,14 @@ export default function Sky({ visible, selectedId, onSelect, onOpen }: Props) {
 }
 
 function StarCard({ star, onOpen, onClose }: { star: Star; onOpen: () => void; onClose: () => void }) {
-  const { state, today, set, startTimer, stopTimer } = useStore()
+  const { state, today, startTimer, stopTimer } = useStore()
   const c = star.cosplay
   const event = state.events.filter((e) => e.cosplayId === c.id && e.date >= iso(today)).sort((a, b) => a.date.localeCompare(b.date))[0]
   const running = state.timer?.cosplayId === c.id
   const now = useNow(running ? 1000 : null)
   const elapsed = running && state.timer ? Math.max(0, Math.floor((now - state.timer.startedAt) / 1000)) : 0
-  const isCurrent = state.currentCosplayId === c.id
   const facts = [
-    sel.progressSource(sel.cosplayTaskStats(state, c.id), c.status === 'Terminé'),
+    sel.progressSource(sel.cosplayPartStats(state, c.id), c.status === 'Fini'),
     event && `${event.name} · J-${daysUntil(event.date, today)}`,
     `${euros(sel.cosplaySpent(state, c.id))} dépensés`,
     hours(sel.cosplayMinutes(state, c.id)),
@@ -248,13 +247,6 @@ function StarCard({ star, onOpen, onClose }: { star: Star; onOpen: () => void; o
         <p className="text-[10px] text-argent">{c.series} · {c.version || '—'}</p>
         <div className="mt-3 flex items-center gap-2">
           <Chip>{c.status.toUpperCase()}</Chip>
-          {isCurrent ? (
-            <Chip tone="glace">EN COURS ✦</Chip>
-          ) : (
-            <button type="button" onClick={() => set({ currentCosplayId: c.id })} className="cursor-pointer text-[9.5px] tracking-[0.8px] text-glace hover:text-cyan">
-              ☆ METTRE EN COURS
-            </button>
-          )}
           <span className="ml-auto text-[12px] font-medium" style={{ color: star.color }}>{star.progress} %</span>
         </div>
         <div className="mt-3"><ProgressBar value={star.progress} label={`Avancement ${c.name}`} /></div>

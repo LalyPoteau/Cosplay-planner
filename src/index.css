@@ -12,7 +12,7 @@
   --color-glace: #a9c7ff;   /* Bleu glace — borders, secondary */
   --color-cyan: #5cf2e4;    /* Cyan terminal — accent */
   --color-argent: #b9c0d4;  /* Argent — secondary text */
-  --color-ardoise: #7c86a8; /* Ardoise — muted labels */
+  --color-ardoise: #949dbd; /* Ardoise — muted labels (lightened from #7c86a8 for WCAG AA 4.5:1 on panels) */
   --color-ailes: #f2f6ff;   /* Blanc ailes — text */
   --color-rose: #ffd6ec;    /* Rose — deadlines */
   --color-glitch: #ff3b5c;  /* Alerte glitch — danger */
@@ -43,6 +43,12 @@
     @apply bg-nuit font-mono text-ailes antialiased;
     line-height: normal; /* match Figma text boxes */
     color-scheme: dark;
+  }
+
+  /* Visible keyboard focus everywhere (components may override) */
+  :focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 2px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -91,6 +97,19 @@
     rgb(255 255 255 / var(--scan-alpha, 0.05)) 0 1px,
     transparent 1px var(--scan-gap, 4px)
   );
+}
+
+/* Old-footage TV static (SVG noise), jittered in steps */
+@utility static-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: static-jitter 0.5s steps(5) infinite;
+}
+@keyframes static-jitter {
+  0% { background-position: 0 0; }
+  20% { background-position: -37px 21px; }
+  40% { background-position: 52px -14px; }
+  60% { background-position: -18px -49px; }
+  80% { background-position: 29px 43px; }
 }
 
 /* Discreet scrollbar for panels that scroll inside */

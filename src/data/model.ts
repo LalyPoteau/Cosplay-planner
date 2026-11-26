@@ -2,8 +2,8 @@ import type { SpotId } from './spots'
 
 // Data model + date helpers. The local database will store exactly these shapes later.
 
-export type CosplayStatus = 'Idée' | 'Fabrication' | 'Terminé'
-export const STATUSES: CosplayStatus[] = ['Idée', 'Fabrication', 'Terminé']
+export type CosplayStatus = 'Prévu' | 'En cours' | 'Fini'
+export const STATUSES: CosplayStatus[] = ['Prévu', 'En cours', 'Fini']
 
 export type Cosplay = {
   id: string
@@ -101,7 +101,6 @@ export type State = {
   profile: { name: string; roles: string; session: number; motto: string }
   budgetTarget: number
   categories: Category[]
-  currentCosplayId: string | null
   timer: { cosplayId: string | null; pieceId: string | null; startedAt: number } | null
   lastExport: string | null
 } & { [K in CollectionKey]: Collections[K][] }

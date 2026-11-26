@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { iso, uid, type CollectionKey, type State } from './model'
 import { seed } from './seed'
+import { syncStatuses } from './selectors'
 import { StoreContext, type Store } from './useStore'
 
 // In-memory for now (refresh = back to sample data). The local database will plug in here.
@@ -10,7 +11,10 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
 
   const actions = useMemo(() => {
     const patchList = (key: CollectionKey, fn: (list: { id: string }[]) => { id: string }[]) =>
-      setState((s) => ({ ...s, [key]: fn(s[key]) }))
+      setState((s) => {
+        const next = { ...s, [key]: fn(s[key]) }
+        return (key === 'tasks' || key === 'pieces' ? syncStatuses(s, next) : next)
+      })
 
     return {
       add: (key, item) => {

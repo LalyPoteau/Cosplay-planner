@@ -198,7 +198,7 @@ function RefGrid({ refs, onOpen }: { refs: Reference[]; onOpen: (id: string) => 
               aria-label="Titre"
               value={r.title}
               onChange={(e) => update('refs', r.id, { title: e.target.value })}
-              className="min-w-0 flex-1 bg-transparent text-[11.5px] font-medium text-ailes outline-none focus:text-cyan"
+              className="min-w-0 flex-1 bg-transparent text-[11.5px] font-medium text-ailes focus:text-cyan"
             />
             <IconButton label={`Supprimer ${r.title}`} onClick={() => remove('refs', r.id)}>✕</IconButton>
           </div>

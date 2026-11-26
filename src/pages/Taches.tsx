@@ -9,13 +9,13 @@ import Board, { QuickTask } from './taches/Board'
 export default function Taches() {
   const { state } = useStore()
   const color = useSeriesColor()
-  const [who, setWho] = useState<string>(state.currentCosplayId ?? 'all')
+  const [who, setWho] = useState<string>('all')
   const [hideDone, setHideDone] = useState(false)
 
-  // characters that have something on the board, current one first
+  // characters that have something on the board, those in work first
   const characters = state.cosplays
     .filter((c) => sel.boardCards(state, [c.id]).length)
-    .sort((a, b) => Number(b.id === state.currentCosplayId) - Number(a.id === state.currentCosplayId))
+    .sort((a, b) => Number(b.status === 'En cours') - Number(a.status === 'En cours'))
   const ids = who === 'all' ? characters.map((c) => c.id) : [who]
   const open = state.tasks.filter((t) => !t.done)
 

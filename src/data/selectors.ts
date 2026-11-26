@@ -47,40 +47,39 @@ export const cosplaySpent = (s: State, cosplayId: string) =>
   sum(s.expenses.filter((e) => e.cosplayId === cosplayId).map((e) => e.amount))
 
 /**
- * Progress = share of the cosplay's tasks that are done.
- * No tasks → the manual progress. A finished cosplay is always 100 %.
+ * Progress = average of the cosplay's main tasks (board cards: each piece, planned ones included,
+ * plus "toute la tenue"). Subtasks only weigh inside their main task.
+ * No parts → the manual progress. A finished cosplay is always 100 %.
  */
 export function cosplayProgress(s: State, cosplayId: string) {
   const cosplay = s.cosplays.find((c) => c.id === cosplayId)
-  if (cosplay?.status === 'Terminé') return 100
-  const tasks = s.tasks.filter((t) => t.cosplayId === cosplayId)
-  if (!tasks.length) return cosplay?.progress ?? 0
-  return Math.round((tasks.filter((t) => t.done).length / tasks.length) * 100)
+  if (cosplay?.status === 'Fini') return 100
+  const cards = boardCards(s, [cosplayId])
+  if (!cards.length) return cosplay?.progress ?? 0
+  return Math.round(sum(cards.map((c) => c.progress)) / cards.length)
 }
 
-export const hasTasks = (s: State, cosplayId: string) => s.tasks.some((t) => t.cosplayId === cosplayId)
+export const hasParts = (s: State, cosplayId: string) => boardCards(s, [cosplayId]).length > 0
+
+const isComplete = (s: State, cosplayId: string) => {
+  const cards = boardCards(s, [cosplayId])
+  return cards.length > 0 && cards.every((c) => c.progress >= 100)
+}
+
+/** After a task/piece change: a cosplay whose parts all just got done becomes "Fini", and goes back to "En cours" if one reopens. */
+export function syncStatuses(prev: State, next: State): State {
+  let changed = false
+  const cosplays = next.cosplays.map((c) => {
+    const was = isComplete(prev, c.id)
+    const now = isComplete(next, c.id)
+    if (now && !was && c.status !== 'Fini') return (changed = true), { ...c, status: 'Fini' as const }
+    if (!now && was && c.status === 'Fini') return (changed = true), { ...c, status: 'En cours' as const }
+    return c
+  })
+  return changed ? { ...next, cosplays } : next
+}
 
 const byDue = (a: Task, b: Task) => (a.due ?? '9999').localeCompare(b.due ?? '9999')
-
-export function currentCosplay(s: State, today: Date) {
-  const index = s.cosplays.findIndex((c) => c.id === s.currentCosplayId)
-  if (index < 0) return null
-  const cosplay = s.cosplays[index]
-  const nextTask =
-    s.tasks
-      .filter((t) => t.cosplayId === cosplay.id && !t.done && (!t.due || t.due > iso(today)))
-      .sort(byDue)[0] ??
-    s.tasks.filter((t) => t.cosplayId === cosplay.id && !t.done).sort(byDue)[0] ??
-    null
-  return {
-    cosplay,
-    position: index + 1,
-    total: s.cosplays.length,
-    progress: cosplayProgress(s, cosplay.id),
-    nextTask,
-    dueInDays: nextTask?.due ? daysUntil(nextTask.due, today) : null,
-  }
-}
 
 export function nextEvent(s: State, today: Date) {
   const event = s.events.filter((e) => e.date >= iso(today)).sort((a, b) => a.date.localeCompare(b.date))[0]
@@ -113,10 +112,10 @@ export function pieceProgress(s: State, pieceId: string) {
   return Math.round((tasks.filter((t) => t.done).length / tasks.length) * 100)
 }
 
-/** Done / total tasks of a cosplay — this is what its progression is computed from. */
-export function cosplayTaskStats(s: State, cosplayId: string) {
-  const tasks = s.tasks.filter((t) => t.cosplayId === cosplayId)
-  return { done: tasks.filter((t) => t.done).length, total: tasks.length }
+/** Finished / total main tasks (board cards) of a cosplay — what its progression is computed from. */
+export function cosplayPartStats(s: State, cosplayId: string) {
+  const cards = boardCards(s, [cosplayId])
+  return { done: cards.filter((c) => c.progress >= 100).length, total: cards.length }
 }
 
 export function pieceTaskStats(s: State, pieceId: string) {
@@ -126,9 +125,9 @@ export function pieceTaskStats(s: State, pieceId: string) {
 
 /** Human-readable explanation of where a progression comes from. */
 export const progressSource = ({ done, total }: { done: number; total: number }, finished = false) =>
-  finished ? 'cosplay terminé' : total ? `${done} / ${total} tâches réalisées` : 'progression manuelle (aucune tâche)'
+  finished ? 'cosplay fini' : total ? `${done} / ${total} parties terminées` : 'progression manuelle (aucune partie)'
 
-export const pieceStatus = (progress: number) => (progress >= 100 ? 'Terminé' : progress > 0 ? 'En cours' : 'À faire')
+export const pieceStatus = (progress: number) => (progress >= 100 ? 'Fini' : progress > 0 ? 'En cours' : 'Prévu')
 
 export const pieceMinutes = (s: State, pieceId: string) =>
   sum(s.time.filter((t) => t.pieceId === pieceId).map((t) => t.minutes))

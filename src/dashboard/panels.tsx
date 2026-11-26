@@ -4,16 +4,13 @@ import horlogeTile from '../assets/icons/horloge-tile.svg'
 import terminalTile from '../assets/icons/terminal-tile.svg'
 import calendrierTile from '../assets/icons/calendrier-tile.svg'
 import fleche from '../assets/icons/fleche.svg'
-import camera from '../assets/icons/camera.svg'
-import play from '../assets/icons/play.svg'
 import check from '../assets/icons/check.svg'
 import wingsCard from '../assets/fx/wings-card.svg'
-import { Button, Chip, Empty, GlitchTitle, Panel, ProgressBar } from '../components/ui'
+import { Chip, Empty, Panel, ProgressBar } from '../components/ui'
 import { euros, hours, parseDay, taskMeta, type Task } from '../data/model'
 import * as sel from '../data/selectors'
 import { useStore } from '../data/useStore'
 import { navigate, openCosplay, type Route } from '../router'
-import { useNow } from '../useNow'
 
 export function QuickAccess({ className = '' }: { className?: string }) {
   const { state, today, exportJson } = useStore()
@@ -58,91 +55,52 @@ export function QuickAccess({ className = '' }: { className?: string }) {
   )
 }
 
-export function CurrentCosplay() {
-  const { state, today, startTimer, stopTimer } = useStore()
-  const current = sel.currentCosplay(state, today)
-  const timer = state.timer
-  const now = useNow(timer ? 1000 : null)
+const CORNERS = [
+  'top-2 left-2 border-t-[1.6px] border-l-[1.6px]',
+  'top-2 right-2 border-t-[1.6px] border-r-[1.6px]',
+  'bottom-2 left-2 border-b-[1.6px] border-l-[1.6px]',
+  'bottom-2 right-2 border-b-[1.6px] border-r-[1.6px]',
+]
 
-  if (!current) {
-    return (
-      <Panel title="COSPLAY EN COURS" className="h-full">
-        <Empty>Aucun cosplay en cours. Choisis-en un dans le Ciel des projets.</Empty>
-      </Panel>
-    )
-  }
-  const { cosplay: c, nextTask } = current
-  const running = timer?.cosplayId === c.id
-  const elapsed = running ? Math.max(0, Math.floor((now - timer.startedAt) / 1000)) : 0
-  const clock = `${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}`
-
+/** Picture-only shortcuts to every cosplay in work, styled like old camera footage. */
+export function InWorkCosplays() {
+  const { state } = useStore()
+  const inWork = state.cosplays.filter((c) => c.status === 'En cours')
   return (
-    <Panel title="COSPLAY EN COURS" tag={`${String(current.position).padStart(2, '0')} / ${String(current.total).padStart(2, '0')}`}>
-      <div className="flex gap-5 px-[15px] pt-[17px] pb-4">
-        {/* Photo drop zone — will hold the cosplay picture once storage exists */}
-        <div className="relative size-60 shrink-0 overflow-hidden border border-glace/45 bg-linear-[240deg] from-[#2a3380] from-13% to-[#0b1030] to-87%">
-          <div className="absolute inset-0 bg-linear-[250deg] from-halo/35 from-11% to-cyan/12 to-89%" />
-          {c.icon ? (
-            <img src={c.icon} alt={c.name} className="absolute inset-0 size-full object-cover" />
-          ) : (
-            <img src={wingsCard} alt="" className="absolute top-[29px] -left-[41px] h-[200px] w-[320px] max-w-none" />
-          )}
-          <div className="scanlines absolute inset-0" />
-          {[
-            'top-2 left-2 border-t-[1.6px] border-l-[1.6px]',
-            'top-2 right-2 border-t-[1.6px] border-r-[1.6px]',
-            'bottom-2 left-2 border-b-[1.6px] border-l-[1.6px]',
-            'bottom-2 right-2 border-b-[1.6px] border-r-[1.6px]',
-          ].map((pos) => (
-            <span key={pos} className={`absolute size-[14px] border-cyan/90 ${pos}`} />
-          ))}
-          <p className="absolute top-[13px] left-[15px] text-[9.5px] font-medium tracking-[1.33px] text-cyan">
-            IMAGE · {c.name.toUpperCase()}
-          </p>
-          {!c.icon && (
-            <>
-              <img src={camera} alt="" className="absolute top-[95px] left-[103px] size-8" />
+    <Panel title="COSPLAYS EN COURS" tag={`[${String(inWork.length).padStart(2, '0')}]`} className="h-full">
+      {inWork.length === 0 ? (
+        <Empty>Aucun cosplay en cours. Passe un projet en « En cours » depuis sa fiche.</Empty>
+      ) : (
+        <ul className="flex min-h-0 flex-1 gap-3 overflow-x-auto overflow-y-hidden [scrollbar-color:rgb(169_199_255/0.3)_transparent] [scrollbar-width:thin] px-[15px] pt-3 pb-3">
+          {inWork.map((c) => (
+            <li key={c.id} className="aspect-[4/5] h-full shrink-0">
               <button
                 type="button"
                 onClick={() => openCosplay(c.id)}
-                className="absolute top-[131px] left-[15px] flex h-6 w-[208px] cursor-pointer items-center justify-center rounded-full bg-nuit/60 text-[10.5px] tracking-[0.63px] text-argent hover:text-cyan"
+                aria-label={`Ouvrir ${c.name}`}
+                className="group relative block size-full cursor-pointer overflow-hidden border border-glace/45 bg-linear-[240deg] from-[#2a3380] from-13% to-[#0b1030] to-87% transition hover:border-cyan hover:shadow-[0_0_12px_rgb(92_242_228/0.4)]"
               >
-                Ajouter une icône
+                <span className="absolute inset-0 bg-linear-[250deg] from-halo/35 from-11% to-cyan/12 to-89%" />
+                {c.icon ? (
+                  <img src={c.icon} alt="" className="absolute inset-0 size-full object-cover" />
+                ) : (
+                  <img src={wingsCard} alt="" className="absolute inset-0 size-full object-cover opacity-70" />
+                )}
+                <span className="static-noise absolute inset-0 opacity-[0.16] mix-blend-screen transition group-hover:opacity-[0.08]" />
+                <span className="scanlines absolute inset-0 [--scan-alpha:0.07] [--scan-gap:3px]" />
+                <span className="absolute inset-x-0 top-0 h-16 bg-linear-to-b from-nuit/80 to-transparent" />
+                {CORNERS.map((pos) => (
+                  <span key={pos} className={`absolute size-[14px] border-cyan/90 ${pos}`} />
+                ))}
+                <span className="absolute top-[13px] right-[15px] left-[15px] text-left">
+                  <span className="block truncate text-[10px] font-medium tracking-[1.33px] text-cyan uppercase">{c.name}</span>
+                  <span className="mt-[2px] block truncate text-[9px] tracking-[1px] text-argent uppercase">{c.series || 'Sans série'}</span>
+                </span>
               </button>
-            </>
-          )}
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <p className="mt-[6px] text-[10px] font-medium tracking-[1.2px] text-cyan uppercase">
-            {c.series} · {c.version}
-          </p>
-          <h3 className="mt-[5px] text-[38px] leading-[46px]">
-            <GlitchTitle>{c.name}</GlitchTitle>
-          </h3>
-          <div className="mt-[6px] flex gap-1">
-            <Chip>{c.status.toUpperCase()}</Chip>
-            <Chip tone="glace">{current.progress} %</Chip>
-          </div>
-          <div className="mt-4">
-            <ProgressBar value={current.progress} label={`Avancement ${c.name}`} />
-            <p className="mt-1 text-right text-[9px] text-ardoise">{sel.progressSource(sel.cosplayTaskStats(state, c.id), c.status === 'Terminé')}</p>
-          </div>
-          <p className="mt-[2px] label-hud">Prochaine étape</p>
-          <p className="mt-1 text-[14px] font-medium text-ailes">{nextTask?.title ?? 'Tout est fait ✦'}</p>
-          <p className="mt-1 text-[10.5px] text-rose">
-            {current.dueInDays === null ? 'Pas d’échéance' : current.dueInDays < 0 ? `En retard de ${-current.dueInDays} j` : `Échéance dans ${current.dueInDays} jours`}
-          </p>
-          <div className="mt-auto flex gap-[10px]">
-            <Button variant="primary" icon={play} className="w-[166px] px-0" onClick={() => (running ? stopTimer() : startTimer(c.id))}>
-              {running ? `STOP · ${clock}` : `REPRENDRE${nextTask?.estimateMin ? ` · ${nextTask.estimateMin} MIN` : ''}`}
-            </Button>
-            <Button className="w-[148px] px-0" onClick={() => openCosplay(c.id)}>
-              OUVRIR LA FICHE
-            </Button>
-          </div>
-        </div>
-      </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </Panel>
   )
 }

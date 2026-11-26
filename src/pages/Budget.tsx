@@ -8,7 +8,7 @@ import { CosplaySelect } from './shared'
 export default function Budget() {
   const { state, today, add, update, remove } = useStore()
   const b = sel.budgetSummary(state, today)
-  const blank = { label: '', amount: '', category: state.categories[0]?.name ?? '', cosplayId: state.currentCosplayId, date: iso(today), paid: true }
+  const blank = { label: '', amount: '', category: state.categories[0]?.name ?? '', cosplayId: null as string | null, date: iso(today), paid: true }
   const [form, setForm] = useState(blank)
 
   const submit = (e: FormEvent) => {

@@ -48,7 +48,7 @@ export default function Calendar({ selectedDay, onPickDay }: Props) {
         ))}
       </div>
 
-      <div className="mx-4 mb-4 grid grid-cols-7 gap-px border border-glace/15 bg-glace/15" role="grid" aria-label={title}>
+      <div className="mx-4 mb-4 grid grid-cols-7 gap-px border border-glace/15 bg-glace/15" role="group" aria-label={title}>
         {days.map((date) => {
           const day = iso(date)
           const inMonth = date.getMonth() === month.getMonth()
@@ -59,9 +59,8 @@ export default function Calendar({ selectedDay, onPickDay }: Props) {
             <button
               key={day}
               type="button"
-              role="gridcell"
               aria-label={`${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}${items.length ? `, ${items.length} élément(s)` : ''}`}
-              aria-selected={isPicked}
+              aria-pressed={isPicked}
               onClick={() => onPickDay(day)}
               className={`group relative flex min-h-[104px] cursor-pointer flex-col gap-1 p-[6px] text-left transition ${
                 inMonth ? 'bg-[#121a45]/90 hover:bg-[#1b2563]' : 'bg-nuit/80 hover:bg-[#121a45]'
@@ -73,7 +72,7 @@ export default function Calendar({ selectedDay, onPickDay }: Props) {
                     ? 'rounded-full bg-cyan font-semibold text-nuit shadow-[0_0_10px_rgb(92_242_228/0.6)]'
                     : inMonth
                       ? 'text-ailes'
-                      : 'text-ardoise/60'
+                      : 'text-ardoise'
                 }`}
               >
                 {date.getDate()}

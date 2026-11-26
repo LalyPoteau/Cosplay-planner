@@ -213,7 +213,7 @@ function CardDialog({ card, onClose }: { card: sel.BoardCard; onClose: () => voi
 /** One-line task creation: title, character, piece, due date. */
 export function QuickTask({ cosplayId: fixedCosplay }: { cosplayId?: string }) {
   const { state, add } = useStore()
-  const [form, setForm] = useState({ title: '', cosplayId: fixedCosplay ?? state.currentCosplayId ?? '', pieceId: '', due: '' })
+  const [form, setForm] = useState({ title: '', cosplayId: fixedCosplay ?? '', pieceId: '', due: '' })
   const pieces = form.cosplayId ? sel.piecesOf(state, form.cosplayId) : []
 
   const submit = (e: FormEvent) => {

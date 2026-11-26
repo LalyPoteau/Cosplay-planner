@@ -102,7 +102,7 @@ function PieceList({ cosplayId, pieces, selectedId, onSelect, newSpot, setNewSpo
                 }`}
               >
                 <span className="absolute top-[15px] left-[13px]">
-                  {status === 'Terminé' ? (
+                  {status === 'Fini' ? (
                     <span className="grid size-[18px] place-items-center rounded-full border border-cyan/80 bg-cyan/20"><img src={check} alt="" className="size-3" /></span>
                   ) : active ? (
                     <img src={radioActive} alt="" className="-m-px size-5 max-w-none" />
@@ -207,7 +207,8 @@ function MannequinView({ pieces, selectedId, onSelect, onAddAt }: ViewProps) {
           <button
             key={m.piece.id}
             type="button"
-            aria-label={`Ouvrir ${m.piece.name}`}
+            aria-hidden
+            tabIndex={-1}
             onClick={() => onSelect(m.piece.id)}
             className="group absolute size-[14px] cursor-pointer"
             style={{ left: m.x - 7, top: m.y - 7 }}
@@ -291,7 +292,7 @@ function PieceDetail({ piece, onDeleted, onOpenRefs }: { piece: Piece; onDeleted
       <div className="scroll-thin flex min-h-0 flex-1 flex-col px-5 pt-[22px] pb-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-glace/15 pb-[14px]">
           <div className="flex items-center gap-2">
-            <Chip tone={status === 'À faire' ? 'glace' : 'cyan'}>{status.toUpperCase()}</Chip>
+            <Chip tone={status === 'Prévu' ? 'glace' : 'cyan'}>{status.toUpperCase()}</Chip>
             <SpotSelect className="field h-[22px] px-1 text-[9.5px]" value={piece.spot} onChange={(spot) => update('pieces', piece.id, { spot })} />
           </div>
           <span className="text-[11px] text-argent">Temps passé <span className="ml-1 text-ailes">{hours(sel.pieceMinutes(state, piece.id))}</span></span>
@@ -397,7 +398,7 @@ function PieceDetail({ piece, onDeleted, onOpenRefs }: { piece: Piece; onDeleted
             value={piece.notes}
             onChange={(e) => update('pieces', piece.id, { notes: e.target.value })}
             placeholder="Mesures, astuces, liens de tutos…"
-            className="min-h-[96px] flex-1 resize-y bg-transparent text-[11px] leading-[1.5] text-argent outline-none placeholder:text-ardoise"
+            className="min-h-[96px] flex-1 resize-y bg-transparent text-[11px] leading-[1.5] text-argent placeholder:text-ardoise"
           />
           <button
             type="button"

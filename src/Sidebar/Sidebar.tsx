@@ -8,7 +8,7 @@ import calendrier from '../assets/icons/calendrier.svg'
 import stockage from '../assets/icons/stockage.svg'
 import type { NavRoute } from '../router'
 
-const items: { id: NavRoute; label: string; icon: string }[] = [
+export const items: { id: NavRoute; label: string; icon: string }[] = [
   { id: 'accueil', label: 'Accueil', icon: halo },
   { id: 'ciel', label: 'Ciel', icon: eclat },
   { id: 'budget', label: 'Budget', icon: cible },
@@ -23,7 +23,9 @@ type Props = { active: NavRoute; onNavigate: (route: NavRoute) => void }
 export default function Sidebar({ active, onNavigate }: Props) {
   return (
     <aside className="fixed inset-y-0 left-0 z-20 flex w-[72px] flex-col items-center border-r border-glace/18 bg-linear-to-b from-[#111949] to-[#080b1a]">
-      <img src={logo} alt="Cosplay Planner" className="mt-[2px] size-[72px] max-w-none" />
+      <button type="button" onClick={() => onNavigate('accueil')} title="Accueil" className="mt-[2px] cursor-pointer transition hover:brightness-125">
+        <img src={logo} alt="Cosplay Planner — accueil" className="size-[72px] max-w-none" />
+      </button>
 
       <nav aria-label="Navigation principale" className="mt-[22px] flex w-full flex-col gap-[10px]">
         {items.map(({ id, label, icon }) => {

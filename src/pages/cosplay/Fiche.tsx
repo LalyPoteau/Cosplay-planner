@@ -7,7 +7,7 @@ import eclat from '../../assets/icons/eclat.svg'
 import play from '../../assets/icons/play.svg'
 import CosplayIcon from '../../components/CosplayIcon'
 import { Button, Chip, Empty, GlitchTitle, HudCorners, ProgressBar } from '../../components/ui'
-import { euros, hours, parseDay } from '../../data/model'
+import { euros, hours, parseDay, STATUSES } from '../../data/model'
 import * as sel from '../../data/selectors'
 import { useStore } from '../../data/useStore'
 import { navigate } from '../../router'
@@ -27,7 +27,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 /** Fiche d'un cosplay (Figma: B2 · Mannequin du cosplay). */
 export default function CosplayFiche({ id, initialTab }: { id: string; initialTab?: string | null }) {
-  const { state, today, set, update, startTimer, stopTimer } = useStore()
+  const { state, today, update, startTimer, stopTimer } = useStore()
   const [tab, setTab] = useState<Tab>(() => TABS.find((t) => t.id === initialTab)?.id ?? 'mannequin')
   const [refFilter, setRefFilter] = useState<RefFilter>('all')
   const cosplay = state.cosplays.find((c) => c.id === id)
@@ -47,7 +47,6 @@ export default function CosplayFiche({ id, initialTab }: { id: string; initialTa
   const spent = sel.cosplaySpent(state, cosplay.id)
   const deadline = sel.cosplayDeadline(state, cosplay.id, today)
   const elapsed = running && state.timer ? Math.max(0, Math.floor((now - state.timer.startedAt) / 1000)) : 0
-  const isCurrent = state.currentCosplayId === cosplay.id
 
   const dateLabel = deadline
     ? parseDay(deadline.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -68,10 +67,24 @@ export default function CosplayFiche({ id, initialTab }: { id: string; initialTa
           </nav>
           <h1 className="mt-[5px] text-[38px] leading-[46px]"><GlitchTitle>{cosplay.name}</GlitchTitle></h1>
         </div>
-        <div className="flex gap-3">
-          <Button className={`w-[200px] ${isCurrent ? 'pointer-events-none border-cyan/50 text-cyan' : ''}`} onClick={() => set({ currentCosplayId: cosplay.id })}>
-            {isCurrent ? '✦ COSPLAY EN COURS' : '☆ METTRE EN COURS'}
-          </Button>
+        <div className="flex flex-wrap gap-3">
+          {/* one state at a time: native radios give single choice + arrow keys for free */}
+          <fieldset className="flex h-10 border border-glace/50 bg-glace/7 p-[3px]">
+            <legend className="sr-only">État du cosplay</legend>
+            {STATUSES.map((status) => (
+              <label key={status} className="relative flex cursor-pointer items-center px-3 text-[10.5px] font-semibold tracking-[0.6px] text-argent transition hover:text-ailes has-checked:bg-cyan/95 has-checked:text-nuit has-focus-visible:outline-2 has-focus-visible:outline-cyan">
+                <input
+                  type="radio"
+                  name="cosplay-state"
+                  value={status}
+                  checked={cosplay.status === status}
+                  onChange={() => update('cosplays', cosplay.id, { status })}
+                  className="sr-only"
+                />
+                {status.toUpperCase()}
+              </label>
+            ))}
+          </fieldset>
           <Button variant="primary" icon={running ? undefined : play} className="w-[170px]" onClick={() => (running ? stopTimer() : startTimer(cosplay.id))}>
             {running ? `■ STOP · ${clock}` : 'CHRONO'}
           </Button>
@@ -92,7 +105,7 @@ export default function CosplayFiche({ id, initialTab }: { id: string; initialTa
         </div>
         <Stat label="PROGRESSION" value={`${progress} %`}>
           <ProgressBar value={progress} height={5} label="Progression" />
-          <p className="text-[9.5px] text-ardoise">{sel.progressSource(sel.cosplayTaskStats(state, cosplay.id), cosplay.status === 'Terminé')}</p>
+          <p className="text-[9.5px] text-ardoise">{sel.progressSource(sel.cosplayPartStats(state, cosplay.id), cosplay.status === 'Fini')}</p>
         </Stat>
         <Stat label="BUDGET" value={cosplay.budget ? `${euros(spent)} / ${euros(cosplay.budget)}` : euros(spent)}>
           {cosplay.budget > 0 ? (
@@ -108,13 +121,30 @@ export default function CosplayFiche({ id, initialTab }: { id: string; initialTa
       </section>
 
       {/* tabs */}
-      <div role="tablist" aria-label="Sections de la fiche" className="mt-4 flex flex-wrap gap-2">
+      <div
+        role="tablist"
+        aria-label="Sections de la fiche"
+        className="mt-4 flex flex-wrap gap-2"
+        onKeyDown={(e) => {
+          // WAI-ARIA tabs: arrows / Home / End move between tabs
+          const i = TABS.findIndex((t) => t.id === tab)
+          const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key]
+          if (next === undefined) return
+          e.preventDefault()
+          const id = TABS[(next + TABS.length) % TABS.length].id
+          setTab(id)
+          document.getElementById(`tab-${id}`)?.focus()
+        }}
+      >
         {TABS.map((t) => (
           <button
             key={t.id}
             role="tab"
             type="button"
+            id={`tab-${t.id}`}
+            aria-controls="fiche-panel"
             aria-selected={tab === t.id}
+            tabIndex={tab === t.id ? 0 : -1}
             onClick={() => setTab(t.id)}
             className={`flex h-9 min-w-[118px] cursor-pointer items-center gap-2 border pr-4 pl-[11px] text-[11px] transition ${
               tab === t.id
@@ -128,7 +158,7 @@ export default function CosplayFiche({ id, initialTab }: { id: string; initialTa
         ))}
       </div>
 
-      <div className="mt-4 animate-rise" role="tabpanel" key={tab}>
+      <div className="mt-4 animate-rise" role="tabpanel" id="fiche-panel" aria-labelledby={`tab-${tab}`} key={tab}>
         {tab === 'mannequin' && (
           <Mannequin
             cosplayId={cosplay.id}

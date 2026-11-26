@@ -47,8 +47,8 @@ function PieceFoldout({ cosplayId, value, onChange }: { cosplayId: string | null
 
 export default function Temps() {
   const { state, today, add, update, remove, startTimer, stopTimer } = useStore()
-  const [chrono, setChrono] = useState({ cosplayId: state.currentCosplayId, pieceId: null as string | null })
-  const [form, setForm] = useState({ cosplayId: state.currentCosplayId, pieceId: null as string | null, date: iso(today), h: '', m: '', note: '' })
+  const [chrono, setChrono] = useState({ cosplayId: null as string | null, pieceId: null as string | null })
+  const [form, setForm] = useState({ cosplayId: null as string | null, pieceId: null as string | null, date: iso(today), h: '', m: '', note: '' })
   const timer = state.timer
   const now = useNow(timer ? 1000 : null)
 

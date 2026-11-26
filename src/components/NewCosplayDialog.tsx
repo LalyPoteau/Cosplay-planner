@@ -10,7 +10,7 @@ type Props = { onClose: () => void; onCreated: (id: string) => void }
 export default function NewCosplayDialog({ onClose, onCreated }: Props) {
   const { state, add } = useStore()
   const dialog = useRef<HTMLDialogElement>(null)
-  const [form, setForm] = useState({ name: '', series: '', version: '', status: 'Idée' as CosplayStatus, budget: '', icon: null as string | null })
+  const [form, setForm] = useState({ name: '', series: '', version: '', status: 'Prévu' as CosplayStatus, budget: '', icon: null as string | null })
   const series = [...new Set(state.cosplays.map((c) => c.series).filter(Boolean))]
 
   useEffect(() => {

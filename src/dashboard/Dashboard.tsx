@@ -1,7 +1,7 @@
 import avatar from '../assets/fx/avatar.svg'
 import plusDark from '../assets/icons/plus-dark.svg'
 import Banner from './Banner'
-import { BudgetByCategory, BudgetLeft, CurrentCosplay, NextEvent, QuickAccess, TodayTasks, WeekTime } from './panels'
+import { BudgetByCategory, BudgetLeft, InWorkCosplays, NextEvent, QuickAccess, TodayTasks, WeekTime } from './panels'
 import { Button, GlitchTitle } from '../components/ui'
 import { useStore } from '../data/useStore'
 import { openCosplay } from '../router'
@@ -40,7 +40,7 @@ export default function Dashboard() {
       <div className="mt-[22px] grid gap-x-6 gap-y-4 px-6 xl:grid-cols-[268px_minmax(0,1fr)_388px] xl:grid-rows-[300px_280px]">
         <QuickAccess className="animate-rise xl:row-span-2" />
         <div className="animate-rise [animation-delay:60ms]">
-          <CurrentCosplay />
+          <InWorkCosplays />
         </div>
         <div className="flex animate-rise flex-col gap-4 [animation-delay:120ms]">
           <NextEvent />

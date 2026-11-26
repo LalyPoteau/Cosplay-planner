@@ -41,7 +41,7 @@ export default function App() {
   return (
     <StoreProvider>
       {phase !== 'boot' && (
-        <Shell route={route === 'cosplay' ? 'ciel' : route}>
+        <Shell route={route === 'cosplay' ? 'ciel' : route} title={route === 'cosplay' ? 'Fiche cosplay' : undefined}>
           {route === 'cosplay' ? <CosplayFiche key={param} id={param ?? ''} initialTab={sub} /> : <Page key={route} route={route} />}
         </Shell>
       )}
