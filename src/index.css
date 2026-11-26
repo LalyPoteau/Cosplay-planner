@@ -11,17 +11,111 @@
   --color-halo: #8f8cff;    /* Violet halo */
   --color-glace: #a9c7ff;   /* Bleu glace — borders, secondary */
   --color-cyan: #5cf2e4;    /* Cyan terminal — accent */
-  --color-argent: #b9c0d4;  /* Argent — muted text */
+  --color-argent: #b9c0d4;  /* Argent — secondary text */
+  --color-ardoise: #7c86a8; /* Ardoise — muted labels */
   --color-ailes: #f2f6ff;   /* Blanc ailes — text */
+  --color-rose: #ffd6ec;    /* Rose — deadlines */
   --color-glitch: #ff3b5c;  /* Alerte glitch — danger */
 
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --animate-blink: blink 1s steps(1) infinite;
+  --animate-rise: rise 0.5s ease-out both;
+  --animate-fade-out: fade-out 0.5s ease-in forwards;
+
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes fade-out { to { opacity: 0; visibility: hidden; } }
+
+  --animate-twinkle: twinkle 4s ease-in-out infinite;
+  --animate-shoot: shoot 11s ease-out infinite;
+  @keyframes twinkle { 50% { opacity: 0.55; transform: scale(0.9); } }
+  @keyframes shoot {
+    0% { opacity: 0; transform: translate(0, 0) rotate(-26.6deg); }
+    3% { opacity: 1; }
+    12%, 100% { opacity: 0; transform: translate(-520px, 260px) rotate(-26.6deg); }
+  }
 }
 
 @layer base {
   html {
     @apply bg-nuit font-mono text-ailes antialiased;
+    line-height: normal; /* match Figma text boxes */
     color-scheme: dark;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 1ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+    }
+  }
+}
+
+/* Silver → ice gradient used on serif titles and big numbers */
+@utility text-chrome {
+  background-image: linear-gradient(90deg, #f2f6ff 0%, #b9c0d4 42%, #ffffff 52%, #a9c7ff 100%);
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-page {
+  background-image: linear-gradient(180deg, #0c1232 0%, #080b1a 55%, #070916 100%);
+}
+
+@utility bg-panel {
+  background-image: linear-gradient(200deg, rgb(24 33 79 / 0.9) 12%, rgb(13 19 53 / 0.92) 88%);
+}
+
+@utility bg-tile {
+  background-image: linear-gradient(225deg, rgb(58 63 176 / 0.6) 15%, #10163f 85%);
+}
+
+@utility bg-bar {
+  background-image: linear-gradient(90deg, #5cf2e4 0%, #a9c7ff 70%, #f2f6ff 100%);
+  box-shadow: 0 0 8px rgb(92 242 228 / 0.5);
+}
+
+@utility bg-btn-primary {
+  background-image: linear-gradient(182deg, #f2f6ff 7%, #a9c7ff 54%, #8f8cff 93%);
+  filter: drop-shadow(0 0 9px rgb(143 140 255 / 0.45));
+}
+
+/* CRT scanlines: 1px line every `--scan-gap` */
+@utility scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / var(--scan-alpha, 0.05)) 0 1px,
+    transparent 1px var(--scan-gap, 4px)
+  );
+}
+
+/* Discreet scrollbar for panels that scroll inside */
+@utility scroll-thin {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(169 199 255 / 0.3) transparent;
+}
+
+/* Form controls */
+@utility field {
+  height: 36px;
+  border: 1px solid rgb(169 199 255 / 0.4);
+  background: rgb(10 13 31 / 0.5);
+  padding-inline: 10px;
+  font-size: 11.5px;
+  color: var(--color-ailes);
+  outline: none;
+  &::placeholder { color: var(--color-ardoise); }
+  &:focus-visible { border-color: rgb(92 242 228 / 0.7); box-shadow: 0 0 0 1px rgb(92 242 228 / 0.3); }
+}
+
+@utility label-hud {
+  font-size: 9.5px;
+  letter-spacing: 1.14px;
+  color: var(--color-ardoise);
+  text-transform: uppercase;
 }
